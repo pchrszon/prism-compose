@@ -1,5 +1,5 @@
 name:          compose
-version:       0.2.0
+version:       0.3.0
 synopsis:      Parallel composition of Prism modules
 description:   This tool performs the parallel composition of Prism
                modules on the source code level.
@@ -15,12 +15,14 @@ cabal-version: >=1.10
 library
   exposed-modules:
     Compose,
+    Error,
     SrcLoc,
     Syntax,
     Syntax.Operators
   build-depends:
     base >=4.8 && <4.9,
     lens ==4.11.*,
+    mtl ==2.2.1.*,
     text ==1.2.*,
     wl-pprint-text ==1.1.*
   hs-source-dirs:   src
