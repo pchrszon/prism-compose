@@ -58,6 +58,8 @@ module Syntax
 
   , exprAnnot
 
+  , _IdentExpr
+
   , binaryExpr
   , unaryExpr
   , intExpr
@@ -386,6 +388,13 @@ exprAnnot e = case e of
     IntegerExpr _ a    -> a
     BoolExpr _ a       -> a
     CondExpr _ _ _ a   -> a
+
+-- | This 'Prism' provides a 'Traversal' for 'IdentExpr's.
+_IdentExpr :: Prism' (Expr a) (Name, a)
+_IdentExpr = prism' (uncurry IdentExpr) f
+  where
+    f (IdentExpr name a) = Just (name, a)
+    f _                  = Nothing
 
 -- | Smart constructor for 'BinaryExpr' which attaches the annotation of
 -- the left inner expression @l@ to the newly created expression.

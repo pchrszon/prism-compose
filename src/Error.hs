@@ -1,7 +1,6 @@
 {-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell   #-}
 
 -- | Defines errors that can occur during translation.
 
@@ -11,11 +10,7 @@ module Error
   , throw
 
   , module Control.Monad.Except
-
-  , _SyntaxError
   ) where
-
-import Control.Lens.TH
 
 import Control.Monad.Except
 
@@ -24,6 +19,7 @@ import Data.Text.Lazy ( Text )
 import Text.PrettyPrint.Leijen.Text
 
 import SrcLoc
+import Syntax
 
 -- | Represents translation errors. It provides an error description and the
 -- source location.
@@ -39,12 +35,20 @@ throw l = throwError . Error l
 -- | Represents error messages that can occur during translation.
 data ErrorDesc
   = SyntaxError !Text
+  | UndefinedIdentifier !Name
+  | CyclicDependency !Name !LExpr
+  | IncompleteRenaming [Name]
   deriving (Show)
-
-makePrisms ''ErrorDesc
 
 instance Pretty ErrorDesc where
     pretty = \case
         SyntaxError msg ->
             string msg
+        UndefinedIdentifier name -> "undefined identifier" <+> text name
+        CyclicDependency name e ->
+            "cyclic dependency in the definition of" <+> text name <+>
+            parens ("defined as" <+> pretty e)
+        IncompleteRenaming names ->
+            "the definition must rename the following variables" <> colon <>
+            line <> sep (punctuate comma (map text names))
 
