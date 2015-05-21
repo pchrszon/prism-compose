@@ -9,6 +9,8 @@
 module Syntax
   ( module Syntax.Operators
 
+  , Name
+
   , HasExprs(..)
   , HasIdents(..)
 
@@ -242,7 +244,7 @@ instance HasExprs Reward where
     exprs f (Reward name g e a) = Reward name <$> f g <*> f e <*> pure a
 
 data Stmt a = Stmt
-  { stmtAction :: !Name
+  { stmtAction :: Maybe Name
   , stmtGuard  :: Expr a
   , stmtUpdate :: [Update a]
   , stmtAnnot  :: !a
@@ -258,7 +260,7 @@ instance HasExprs Stmt where
 
 instance HasIdents (Stmt a) where
     idents f (Stmt action grd upds a) =
-        Stmt <$> f action
+        Stmt <$> traverse f action
              <*> idents f grd
              <*> traverse (idents f) upds
              <*> pure a
@@ -502,7 +504,8 @@ instance Pretty (Reward a) where
 
 instance Pretty (Stmt a) where
     pretty (Stmt action grd upds _) = hang 4 $
-        brackets (text action) <+> pretty grd <+> "->" </> pretty upds <> semi
+        brackets (maybe empty text action) <+> pretty grd <+> "->" </>
+        pretty upds <> semi
 
 instance Pretty (Update a) where
     pretty (Update e asgns _) = prob e <> align (pretty asgns)
