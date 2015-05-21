@@ -418,14 +418,20 @@ data ThenElse a = Expr a :? Expr a
 (?) :: Expr a -> ThenElse a -> Expr a
 cond ? (te :? ee) = CondExpr cond te ee $ exprAnnot cond
 
-eq, neq, gt, lt, gte, lte, land :: Expr a -> Expr a -> Expr a
+eq, neq, gt, lt, gte, lte :: Expr a -> Expr a -> Expr a
 eq   = binaryExpr (EqBinOp Eq)
 neq  = binaryExpr (EqBinOp Neq)
 gt   = binaryExpr (RelBinOp Gt)
 lt   = binaryExpr (RelBinOp Lt)
 gte  = binaryExpr (RelBinOp Gte)
 lte  = binaryExpr (RelBinOp Lte)
-land = binaryExpr (LogicBinOp LAnd)
+
+land :: Expr a -> Expr a -> Expr a
+BoolExpr True _ `land` r  = r
+l `land` BoolExpr True _  = l
+BoolExpr False a `land` _ = BoolExpr False a
+_ `land` BoolExpr False a = BoolExpr False a
+l `land` r                = binaryExpr (LogicBinOp LAnd) l r
 
 makePrisms ''Definition
 
