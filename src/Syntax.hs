@@ -467,10 +467,10 @@ instance Pretty (Module a) where
 
 instance Pretty (Renaming a) where
     pretty (Renaming name src rns _) =
-        prettyModuleHeader name <+> equals <+> text src </>
+        prettyModuleHeader name <+> equals <+> text src <+>
         brackets (space <>
                   (sep . punctuate (comma <> space) $ map renaming rns) <>
-                  space) </>
+                  space) <+>
         "endmodule"
       where
         renaming (old, new) = text old <+> equals <+> text new
@@ -522,23 +522,23 @@ instance Pretty (Reward a) where
         pretty g <+> colon <+> pretty e <> semi
 
 instance Pretty (Stmt a) where
-    pretty (Stmt action grd upds _) = hang 4 $
-        brackets (maybe empty text action) <+> pretty grd <+> "->" </>
+    pretty (Stmt action grd upds _) =
+        brackets (maybe empty text action) <+> pretty grd <+> "->" <+>
         pretty upds <> semi
 
 instance Pretty (Update a) where
-    pretty (Update e asgns _) = prob e <> align (pretty asgns)
+    pretty (Update e asgns _) = prob e <> pretty asgns
       where
         prob = maybe empty ((<> colon) . pretty)
 
     prettyList []   = "true"
-    prettyList upds = fillSep . punctuate (space <> "+") $ map pretty upds
+    prettyList upds = hsep . punctuate (space <> "+") $ map pretty upds
 
 instance Pretty (Assign a) where
     pretty (Assign name e _) =
             parens (text name <> squote <+> equals <+> pretty e)
     prettyList []    = "true"
-    prettyList asgns = fillSep . punctuate (space <> "&") $ map pretty asgns
+    prettyList asgns = hsep . punctuate (space <> "&") $ map pretty asgns
 
 instance Pretty (Expr a) where
     pretty = prettyExpr 0
@@ -553,7 +553,7 @@ prettyExpr prec e = case e of
         let prec' = unOpPrec unOpT
         in parens' (prec >= prec') $ pretty unOpT <> prettyExpr prec' e'
     FuncExpr func args _  ->
-        pretty func <> parens (align . cat . punctuate comma $ map pretty args)
+        pretty func <> parens (hcat . punctuate comma $ map pretty args)
     IdentExpr v _         -> text v
     DecimalExpr d _       -> double d
     IntegerExpr i _       -> integer i
@@ -575,3 +575,4 @@ instance Pretty Function where
         FuncPow   -> "pow"
         FuncMod   -> "mod"
         FuncLog   -> "log"
+
