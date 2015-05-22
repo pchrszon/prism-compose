@@ -16,12 +16,22 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -}
 
-module Main
-  ( main
+{-# LANGUAGE FlexibleContexts #-}
+
+-- | Provides a parser for Prism models.
+module Parser
+  ( parseModel
   ) where
 
-import Compose
+import Data.Text.Lazy ( Text )
 
-main :: IO ()
-main = composeMain
+import Text.Parsec ( SourceName )
+
+import Error
+import Syntax
+
+import Parser.Internal
+
+parseModel :: MonadError Error m => SourceName -> Text -> m LModel
+parseModel = parseFile model
 
