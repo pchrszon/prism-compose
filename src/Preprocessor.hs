@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GADTs            #-}
+{-# LANGUAGE LambdaCase       #-}
 
 -- | The preprocessor handles the substitution of formulas and the renaming
 -- of modules.
@@ -13,7 +14,7 @@ import Control.Monad
 
 import Data.Map ( Map )
 import qualified Data.Map as Map
-import Data.Set ( difference )
+import Data.Set ( difference, member )
 import qualified Data.Set as Set
 import Data.Traversable
 
@@ -27,7 +28,15 @@ preprocess :: MonadError Error m => LModel -> m LModel
 preprocess (Model modelT defs) = do
     let frmDefs = formulaDefs defs
     checkIfNonCyclic frmDefs
-    Model modelT <$> resolveRenamings (fmap (substituteFormulas frmDefs) defs)
+
+    -- only expand formulas where necessary (i.e. in renamed modules)
+    let renamedMods = Set.fromList $ defs^..traverse._RenameDef.to rnSource
+        defs'       = flip fmap defs $ \case
+            ModuleDef m | modName m `member` renamedMods ->
+                ModuleDef $ substituteFormulas frmDefs m
+            def -> def
+
+    Model modelT <$> resolveRenamings defs'
 
 substituteFormulas :: HasExprs t => Map Name LExpr -> t a -> t a
 substituteFormulas frmDefs = over exprs (rewrite substitute)
