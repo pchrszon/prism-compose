@@ -204,7 +204,7 @@ reward =  loc (Reward <$> action <*> (expr <* colon) <*> (expr <* semi))
       <?> "reward"
   where
     action =
-        optionMaybe (brackets identifier)
+        optionMaybe (brackets (optionMaybe identifier))
 
 initDef :: Parser LDefinition
 initDef = InitDef <$> init' <?> "init definition"

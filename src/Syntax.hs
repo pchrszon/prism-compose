@@ -240,7 +240,7 @@ instance HasExprs Rewards where
         Rewards name <$> traverse (exprs f) rws <*> pure a
 
 data Reward a = Reward
-  { rwAction :: Maybe Name
+  { rwAction :: Maybe (Maybe Name)
   , rwGuard  :: Expr a
   , rwReward :: Expr a
   , rwAnnot  :: !a
@@ -534,7 +534,7 @@ instance Pretty (Rewards a) where
 
 instance Pretty (Reward a) where
     pretty (Reward action g e _) =
-        maybe empty (brackets . text) action <+>
+        maybe empty (brackets . pretty) action <+>
         pretty g <+> colon <+> pretty e <> semi
 
 instance Pretty (Init a) where
