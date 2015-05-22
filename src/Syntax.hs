@@ -228,7 +228,7 @@ instance HasExprs Label where
     exprs f (Label name e a) = Label name <$> f e <*> pure a
 
 data Rewards a = Rewards
-  { rwsName    :: !Name
+  { rwsName    :: Maybe Name
   , rwsRewards :: [Reward a]
   , rwsAnnot   :: !a
   } deriving (Eq, Functor, Show)
@@ -528,7 +528,7 @@ instance Pretty (Label a) where
 
 instance Pretty (Rewards a) where
     pretty (Rewards name rws _) =
-        "rewards" <+> dquotes (text name) <> line <>
+        "rewards" <+> maybe empty (dquotes . text) name <> line <>
         indent 4 (vsep (fmap pretty rws)) <> line <>
         "endrewards"
 

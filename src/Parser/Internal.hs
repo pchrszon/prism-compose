@@ -194,7 +194,8 @@ labelDef = LabelDef <$>
 
 rewardsDef :: Parser LDefinition
 rewardsDef = RewardsDef <$>
-    loc (Rewards <$> (reserved "rewards" *> doubleQuotes identifier)
+    loc (Rewards <$> (reserved "rewards" *>
+                      optionMaybe (doubleQuotes identifier))
                  <*> (many reward <* reserved "endrewards"))
                         <?> "reward structure"
 
