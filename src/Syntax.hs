@@ -26,6 +26,7 @@ module Syntax
   , _FormulaDef
   , _RewardsDef
   , _LabelDef
+  , _InitDef
   , Module(..)
   , LModule
   , Renaming(..)
@@ -45,6 +46,8 @@ module Syntax
   , LRewards
   , Reward(..)
   , LReward
+  , Init(..)
+  , LInit
   , Stmt(..)
   , LStmt
   , Probability
@@ -109,6 +112,7 @@ data Definition a
   | FormulaDef  (Formula a)
   | LabelDef    (Label a)
   | RewardsDef  (Rewards a)
+  | InitDef       (Init a)
   deriving (Eq, Functor, Show)
 
 type LDefinition = Definition SrcLoc
@@ -122,6 +126,7 @@ instance HasExprs Definition where
         FormulaDef  d -> pure $ FormulaDef d
         LabelDef    l -> LabelDef    <$> exprs f l
         RewardsDef  r -> RewardsDef  <$> exprs f r
+        InitDef     i -> InitDef     <$> exprs f i
 
 data Module a = Module
   { modName  :: !Name
@@ -245,6 +250,16 @@ type LReward = Reward SrcLoc
 
 instance HasExprs Reward where
     exprs f (Reward name g e a) = Reward name <$> f g <*> f e <*> pure a
+
+data Init a = Init
+  { initExpr  :: Expr a
+  , initAnnot :: !a
+  } deriving (Eq, Functor, Show)
+
+type LInit = Init SrcLoc
+
+instance HasExprs Init where
+    exprs f (Init e a) = Init <$> f e <*> pure a
 
 data Stmt a = Stmt
   { stmtAction :: Maybe Name
@@ -456,6 +471,7 @@ instance Pretty (Definition a) where
         FormulaDef  f -> pretty f
         LabelDef    l -> pretty l
         RewardsDef  r -> pretty r
+        InitDef     i -> pretty i
 
 instance Pretty (Module a) where
     pretty (Module name decls stmts _) =
@@ -520,6 +536,10 @@ instance Pretty (Reward a) where
     pretty (Reward action g e _) =
         maybe empty (brackets . text) action <+>
         pretty g <+> colon <+> pretty e <> semi
+
+instance Pretty (Init a) where
+    pretty (Init e _) =
+        "init" <> line <> indent 4 (pretty e) <> line <> "endinit"
 
 instance Pretty (Stmt a) where
     pretty (Stmt action grd upds _) =

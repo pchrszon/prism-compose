@@ -14,6 +14,8 @@ module Parser.Internal
   , constantType
   , formulaDef
   , labelDef
+  , rewardsDef
+  , initDef
   , moduleDef
 
   , moduleBody
@@ -73,9 +75,9 @@ toSyntaxError = SyntaxError . pack .
 
 reservedNames, reservedOpNames :: [String]
 reservedNames =
-    [ "mdp", "dtmc", "ctmc", "module", "endmodule", "global", "const"
-    , "formula", "label", "rewards", "endrewards", "init", "bool", "int"
-    , "double", "true", "false" , "min", "max"
+    [ "mdp", "dtmc", "ctmc", "module", "endmodule", "init", "endinit", "global"
+    , "const", "formula", "label", "rewards", "endrewards", "init", "bool"
+    , "int", "double", "true", "false" , "min", "max"
     ]
 reservedOpNames =
     [ "/", "*", "-", "+", "=", "!=", ">", "<", ">=", "<=", "&", "|", "!"
@@ -153,6 +155,7 @@ model = Model <$> option MDP modelType
                                , formulaDef
                                , labelDef
                                , rewardsDef
+                               , initDef
                                ])
 
 modelType :: Parser ModelType
@@ -201,6 +204,12 @@ reward =  loc (Reward <$> action <*> (expr <* colon) <*> (expr <* semi))
   where
     action =
         optionMaybe (brackets identifier)
+
+initDef :: Parser LDefinition
+initDef = InitDef <$> init' <?> "init definition"
+
+init' :: Parser LInit
+init' = loc (Init <$> (reserved "init" *> expr <* reserved "endinit"))
 
 moduleDef :: Parser LDefinition
 moduleDef = do
