@@ -1,4 +1,5 @@
 {-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE FlexibleContexts          #-}
 {-# LANGUAGE OverloadedStrings         #-}
 {-# LANGUAGE TupleSections             #-}
 
@@ -45,8 +46,10 @@ import Error
 import SrcLoc
 import Syntax
 
-parseFile :: Parser a -> SourceName -> Text -> Either Error a
-parseFile p src = over _Left toError . parse (whiteSpace *> p <* eof) src
+parseFile :: MonadError Error m => Parser a -> SourceName -> Text -> m a
+parseFile p src input = case parse (whiteSpace *> p <* eof) src input of
+    Right x  -> return x
+    Left err -> throwError (toError err)
 
 -- | Converts a 'ParseError' to an 'Error'.
 toError :: ParseError -> Error

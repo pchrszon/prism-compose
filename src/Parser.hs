@@ -1,5 +1,6 @@
--- | Provides a parser for Prism models.
+{-# LANGUAGE FlexibleContexts #-}
 
+-- | Provides a parser for Prism models.
 module Parser
   ( parseModel
   ) where
@@ -13,6 +14,6 @@ import Syntax
 
 import Parser.Internal
 
-parseModel :: SourceName -> Text -> Either Error LModel
+parseModel :: MonadError Error m => SourceName -> Text -> m LModel
 parseModel = parseFile model
 

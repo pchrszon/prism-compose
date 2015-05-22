@@ -36,6 +36,7 @@ throw l = throwError . Error l
 data ErrorDesc
   = SyntaxError !Text
   | UndefinedIdentifier !Name
+  | UndefinedModule !Name
   | CyclicDependency !Name !LExpr
   | IncompleteRenaming [Name]
   deriving (Show)
@@ -45,6 +46,7 @@ instance Pretty ErrorDesc where
         SyntaxError msg ->
             string msg
         UndefinedIdentifier name -> "undefined identifier" <+> text name
+        UndefinedModule name -> "module" <+> text name <+> "does not exist"
         CyclicDependency name e ->
             "cyclic dependency in the definition of" <+> text name <+>
             parens ("defined as" <+> pretty e)

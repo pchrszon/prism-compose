@@ -23,11 +23,11 @@ import Syntax
 
 -- | Performs formula substitution and module renaming. The resulting list
 -- will not contain any 'RenameDef's.
-preprocess :: MonadError Error m => [LDefinition] -> m [LDefinition]
-preprocess defs = do
+preprocess :: MonadError Error m => LModel -> m LModel
+preprocess (Model modelT defs) = do
     let frmDefs = formulaDefs defs
     checkIfNonCyclic frmDefs
-    resolveRenamings (fmap (substituteFormulas frmDefs) defs)
+    Model modelT <$> resolveRenamings (fmap (substituteFormulas frmDefs) defs)
 
 substituteFormulas :: HasExprs t => Map Name LExpr -> t a -> t a
 substituteFormulas frmDefs = over exprs (rewrite substitute)
