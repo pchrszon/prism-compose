@@ -187,14 +187,15 @@ instance HasIdents (VarType a) where
 data Constant a = Constant
   { constType  :: !ConstType
   , constName  :: !Name
-  , constValue :: Expr a
+  , constValue :: Maybe (Expr a)
   , constAnnot :: !a
   } deriving (Eq, Functor, Show)
 
 type LConstant = Constant SrcLoc
 
 instance HasExprs Constant where
-    exprs f (Constant ct name e a) = Constant ct name <$> f e <*> pure a
+    exprs f (Constant ct name e a) =
+        Constant ct name <$> traverse f e <*> pure a
 
 data ConstType
   = BoolConstType
@@ -489,8 +490,11 @@ instance Pretty (VarType a) where
             brackets (pretty lower <+> ".." <+> pretty upper)
 
 instance Pretty (Constant a) where
-    pretty (Constant ct name e _) =
-        "const" <+> pretty ct <+> text name <+> equals <+> pretty e <> semi
+    pretty (Constant ct name val _) =
+        "const" <+> pretty ct <+> text name <> prettyVal val <> semi
+      where
+        prettyVal Nothing  = empty
+        prettyVal (Just e) = space <> equals <+> pretty e
 
 instance Pretty ConstType where
     pretty ct = case ct of

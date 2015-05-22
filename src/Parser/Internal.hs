@@ -146,7 +146,7 @@ loc p = do
     ($ SrcLoc name line column) <$> p
 
 model :: Parser LModel
-model = Model <$> modelType
+model = Model <$> option MDP modelType
               <*> many (choice [ moduleDef
                                , globalDef
                                , constantDef
@@ -169,8 +169,9 @@ constantDef :: Parser LDefinition
 constantDef = ConstDef <$>
     loc (Constant <$> (reserved "const" *>
                        option IntConstType constantType)
-                  <*> (identifier <* reservedOp "=")
-                  <*> (expr <* semi)) <?> "constant definition"
+                  <*> identifier
+                  <*> optionMaybe (reservedOp "=" *> expr) <* semi)
+    <?> "constant definition"
 
 constantType :: Parser ConstType
 constantType =  BoolConstType   <$ reserved "bool"
