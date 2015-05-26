@@ -72,7 +72,9 @@ data RelBinOp
   deriving (Bounded, Enum, Eq, Show)
 
 data LogicBinOp
-  = LAnd
+  = LImpl
+  | LEq
+  | LAnd
   | LOr
   deriving (Bounded, Enum, Eq, Show)
 
@@ -91,6 +93,8 @@ binOpPrec = \case
     LogicBinOp binOp -> case binOp of
         LAnd    -> 5
         LOr     -> 4
+        LEq     -> 3
+        LImpl   -> 3
 
 data UnOp
   = ArithUnOp !ArithUnOp
@@ -141,8 +145,10 @@ instance Pretty RelBinOp where
 
 instance Pretty LogicBinOp where
     pretty = \case
-        LAnd -> "&"
-        LOr  -> "|"
+        LImpl -> "=>"
+        LEq   -> "<=>"
+        LAnd  -> "&"
+        LOr   -> "|"
 
 instance Pretty UnOp where
     pretty unOpT = case unOpT of

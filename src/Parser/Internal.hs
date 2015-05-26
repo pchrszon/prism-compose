@@ -315,24 +315,27 @@ exprOpTable :: OperatorTable Text () Identity LExpr
 exprOpTable = -- operators listed in descending precedence, operators in same group have the same precedence
     [ [ unaryOp "-" $ ArithUnOp Neg
       ]
-    , [ "*"  --> ArithBinOp Mul
-      , "/"  --> ArithBinOp Div
+    , [ "*"   --> ArithBinOp Mul
+      , "/"   --> ArithBinOp Div
       ]
-    , [ "+"  --> ArithBinOp Add
-      , "-"  --> ArithBinOp Sub
+    , [ "+"   --> ArithBinOp Add
+      , "-"   --> ArithBinOp Sub
       ]
-    , [ "="  --> EqBinOp Eq
-      , "!=" --> EqBinOp Neq
-      , ">"  --> RelBinOp Gt
-      , "<"  --> RelBinOp Lt
-      , ">=" --> RelBinOp Gte
-      , "<=" --> RelBinOp Lte
+    , [ "="   --> EqBinOp Eq
+      , "!="  --> EqBinOp Neq
+      , ">"   --> RelBinOp Gt
+      , "<"   --> RelBinOp Lt
+      , ">="  --> RelBinOp Gte
+      , "<="  --> RelBinOp Lte
       ]
     , [ unaryOp "!" $ LogicUnOp LNot
       ]
-    , [ "&"  --> LogicBinOp LAnd
+    , [ "&"   --> LogicBinOp LAnd
       ]
-    , [ "|"  --> LogicBinOp LOr
+    , [ "|"   --> LogicBinOp LOr
+      ]
+    , [ "=>"  --> LogicBinOp LImpl
+      , "<=>" --> LogicBinOp LEq
       ]
     ]
   where
