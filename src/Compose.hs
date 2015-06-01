@@ -58,7 +58,7 @@ appVersion = showVersion version
 
 -- Compose CLI
 --
--- compose [OPTION] MODEL [MODULES]
+-- compose [OPTIONS] MODEL [MODULES]
 --
 -- MODEL
 helpModelFile = "The model file (if '-' is given, the model is read from stdin)"
@@ -120,7 +120,7 @@ composeModules moduleNames model@(Model modelT defs) = do
     then return $ void model
     else do
         case moduleNames \\ modelModules of
-            m:_ -> throw (SrcLoc "<command-line>" 0 0) $ UndefinedModule m
+            m:_ -> throw NoLoc $ UndefinedModule m
             []  -> return ()
 
         let name:others = if null moduleNames then modelModules else moduleNames

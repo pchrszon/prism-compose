@@ -44,7 +44,7 @@ import Syntax
 data Error = Error !SrcLoc !ErrorDesc deriving (Show)
 
 instance Pretty Error where
-    pretty (Error l desc) = pretty l <> colon <> line <> pretty desc
+    pretty (Error l desc) = pretty l <+> pretty desc
 
 -- | Throws an 'Error'.
 throw :: MonadError Error m => SrcLoc -> ErrorDesc -> m a
@@ -61,8 +61,7 @@ data ErrorDesc
 
 instance Pretty ErrorDesc where
     pretty = \case
-        SyntaxError msg ->
-            string msg
+        SyntaxError msg -> string msg
         UndefinedIdentifier name -> "undefined identifier" <+> text name
         UndefinedModule name -> "module" <+> text name <+> "does not exist"
         CyclicDependency name e ->

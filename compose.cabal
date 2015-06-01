@@ -1,5 +1,5 @@
 name:          compose
-version:       1.1.0
+version:       1.1.1
 synopsis:      Parallel composition of Prism modules
 description:   This tool performs the parallel composition of Prism
                modules on the source code level.
