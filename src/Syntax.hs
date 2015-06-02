@@ -130,7 +130,7 @@ data Definition a
   | FormulaDef  (Formula a)
   | LabelDef    (Label a)
   | RewardsDef  (Rewards a)
-  | InitDef       (Init a)
+  | InitDef     (Init a)
   deriving (Eq, Functor, Show)
 
 type LDefinition = Definition SrcLoc

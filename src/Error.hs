@@ -57,6 +57,7 @@ data ErrorDesc
   | UndefinedModule !Name
   | CyclicDependency !Name !LExpr
   | IncompleteRenaming [Name]
+  | IllegalGlobalsMerge
   deriving (Show)
 
 instance Pretty ErrorDesc where
@@ -70,4 +71,7 @@ instance Pretty ErrorDesc where
         IncompleteRenaming names ->
             "the definition must rename the following variables" <> colon <>
             line <> sep (punctuate comma (map text names))
+        IllegalGlobalsMerge ->
+            "cannot merge globals because the model contains more than one" <+>
+            "module"
 

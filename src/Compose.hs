@@ -30,7 +30,7 @@ module Compose
 import Control.Exception.Lens
 import Control.Lens hiding ( argument )
 
-import Data.List ( (\\) )
+import Data.List ( (\\), partition )
 import Data.Maybe
 import Data.Text.Lazy ( Text, pack )
 import qualified Data.Text.Lazy.IO as L
@@ -66,11 +66,14 @@ helpModelFile = "The model file (if '-' is given, the model is read from stdin)"
 -- options:
 --    -o OUTPUT
 helpModelOutput = "Write the model to file OUTPUT"
+--    --merge-globals
+helpMergeGlobals = "Move global variables into the module after composition"
 
 data AppOptions = AppOptions
-  { inModelPath  :: FilePath
-  , outModelPath :: Maybe FilePath
-  , modules      :: [String]
+  { optInModelPath  :: FilePath
+  , optOutModelPath :: Maybe FilePath
+  , optMergeGlobals :: !Bool
+  , optModules      :: [String]
   } deriving (Show)
 
 appOptions :: Parser AppOptions
@@ -80,7 +83,9 @@ appOptions = AppOptions
     <*> optional (strOption ( short 'o'
                            <> metavar "OUTPUT"
                            <> help helpModelOutput ))
-    <*> many (strArgument ( metavar "MODULES..." ))
+    <*> switch              ( long "merge-globals"
+                           <> help helpMergeGlobals )
+    <*> many (strArgument   ( metavar "MODULES..." ))
 
 -- | The entry point of the application.
 composeMain :: IO ()
@@ -97,20 +102,21 @@ composeMain = handling _IOException ioeHandler $
         exitWith $ ExitFailure 2
 
 composeWithOptions :: AppOptions -> IO ()
-composeWithOptions opts = withHandles opts $ \(hIn, hOut) -> do
-    let moduleNames = pack <$> modules opts
+composeWithOptions opts@AppOptions{..} = withHandles opts $ \(hIn, hOut) -> do
+    let moduleNames = pack <$> optModules
     inModel <- L.hGetContents hIn
 
-    case compose moduleNames (inModelPath opts) inModel of
+    let result = do
+            model <- composeModules moduleNames <=<
+                     preprocess <=<
+                     parseModel optInModelPath $ inModel
+            if optMergeGlobals then mergeGlobals model else return model
+
+    case result of
         Left err -> do
             print $ pretty err
             exitWith $ ExitFailure 1
-        Right outModel -> L.hPutStrLn hOut outModel
-
-compose :: MonadError Error m => [Name] -> String -> Text -> m Text
-compose moduleNames modelName =
-    parseModel modelName >=> preprocess >=>
-    (fmap render . composeModules moduleNames)
+        Right outModel -> L.hPutStrLn hOut (render outModel)
 
 composeModules :: MonadError Error m => [Name] -> LModel -> m (Model ())
 composeModules moduleNames model@(Model modelT defs) = do
@@ -136,10 +142,22 @@ composeModules moduleNames model@(Model modelT defs) = do
               | otherwise -> Just $ ModuleDef m
             def -> Just def
 
+mergeGlobals :: MonadError Error m => Model a -> m (Model a)
+mergeGlobals (Model modelT defs) = do
+    when (lengthOf (traverse._ModuleDef) defs > 1) $
+        throw NoLoc IllegalGlobalsMerge
+
+    let (defs', globalDefs) = partition (isn't _GlobalDef) defs
+        globals             = globalDefs^..traverse._GlobalDef
+
+    return . Model modelT $ over (traverse._ModuleDef) (merge globals) defs'
+  where
+    merge decls m = m { modVars = decls ++ modVars m }
+
 withHandles :: AppOptions -> ((Handle, Handle) -> IO ()) -> IO ()
 withHandles AppOptions{..} m =
-    withSourceModel inModelPath $ \im ->
-    maybeWithFile WriteMode outModelPath $ \om ->
+    withSourceModel optInModelPath $ \im ->
+    maybeWithFile WriteMode optOutModelPath $ \om ->
     m (im, om)
 
 withSourceModel :: String -> (Handle -> IO ()) -> IO ()

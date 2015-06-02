@@ -43,3 +43,8 @@ provide a list of modules:
 
     compose my_model.prism process1 process2
 
+If there is only a single module left after composition, it is possible to move
+the global variables into this module using the `--merge-globals` option:
+
+    compose my_model.prism -o out.prism --merge-globals
+
