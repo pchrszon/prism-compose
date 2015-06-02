@@ -44,7 +44,7 @@ import Syntax
 data Error = Error !SrcLoc !ErrorDesc deriving (Show)
 
 instance Pretty Error where
-    pretty (Error l desc) = pretty l <> colon <> line <> pretty desc
+    pretty (Error l desc) = pretty l <+> pretty desc
 
 -- | Throws an 'Error'.
 throw :: MonadError Error m => SrcLoc -> ErrorDesc -> m a
@@ -57,12 +57,12 @@ data ErrorDesc
   | UndefinedModule !Name
   | CyclicDependency !Name !LExpr
   | IncompleteRenaming [Name]
+  | IllegalGlobalsMerge
   deriving (Show)
 
 instance Pretty ErrorDesc where
     pretty = \case
-        SyntaxError msg ->
-            string msg
+        SyntaxError msg -> string msg
         UndefinedIdentifier name -> "undefined identifier" <+> text name
         UndefinedModule name -> "module" <+> text name <+> "does not exist"
         CyclicDependency name e ->
@@ -71,4 +71,7 @@ instance Pretty ErrorDesc where
         IncompleteRenaming names ->
             "the definition must rename the following variables" <> colon <>
             line <> sep (punctuate comma (map text names))
+        IllegalGlobalsMerge ->
+            "cannot merge globals because the model contains more than one" <+>
+            "module"
 
