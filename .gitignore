@@ -5,5 +5,6 @@ dist
 *.swp
 .cabal-sandbox/
 .ghci
+.stack-work
 cabal.sandbox.config
 tmux.conf

@@ -1,5 +1,5 @@
 name:          compose
-version:       1.2.0
+version:       1.2.1
 synopsis:      Parallel composition of Prism modules
 description:   This tool performs the parallel composition of Prism
                modules on the source code level.
@@ -30,7 +30,7 @@ library
   build-depends:
     base >=4.8 && <4.9,
     containers ==0.5.6.*,
-    lens ==4.11.*,
+    lens ==4.12.*,
     mtl ==2.2.1.*,
     optparse-applicative ==0.11.*,
     parsec ==3.1.*,
