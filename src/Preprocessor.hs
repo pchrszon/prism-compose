@@ -43,7 +43,7 @@ import Syntax
 -- | Performs formula substitution and module renaming. The resulting list
 -- will not contain any 'RenameDef's.
 preprocess :: MonadError Error m => LModel -> m LModel
-preprocess (Model modelT defs) = do
+preprocess (Model defs) = do
     let frmDefs = formulaDefs defs
     checkIfNonCyclic frmDefs
 
@@ -54,7 +54,7 @@ preprocess (Model modelT defs) = do
                 ModuleDef $ substituteFormulas frmDefs m
             def -> def
 
-    Model modelT <$> resolveRenamings defs'
+    Model <$> resolveRenamings defs'
 
 substituteFormulas :: HasExprs t => Map Name LExpr -> t a -> t a
 substituteFormulas frmDefs = over exprs (rewrite substitute)
