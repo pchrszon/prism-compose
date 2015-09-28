@@ -119,7 +119,7 @@ composeWithOptions opts@AppOptions{..} = withHandles opts $ \(hIn, hOut) -> do
         Right outModel -> L.hPutStrLn hOut (render outModel)
 
 composeModules :: MonadError Error m => [Name] -> LModel -> m (Model ())
-composeModules moduleNames model@(Model modelT defs) = do
+composeModules moduleNames model@(Model defs) = do
     let modelModules = defs^..traverse._ModuleDef.to modName
 
     if null modelModules
@@ -134,7 +134,7 @@ composeModules moduleNames model@(Model modelT defs) = do
             otherMods   = filter ((`elem` others) . modName) $
                           defs'^..traverse._ModuleDef
 
-        return . Model modelT . flip mapMaybe defs' $ \case
+        return . Model . flip mapMaybe defs' $ \case
             ModuleDef m
               | modName m `elem` others -> Nothing
               | modName m == name ->
@@ -143,14 +143,14 @@ composeModules moduleNames model@(Model modelT defs) = do
             def -> Just def
 
 mergeGlobals :: MonadError Error m => Model a -> m (Model a)
-mergeGlobals (Model modelT defs) = do
+mergeGlobals (Model defs) = do
     when (lengthOf (traverse._ModuleDef) defs > 1) $
         throw NoLoc IllegalGlobalsMerge
 
     let (defs', globalDefs) = partition (isn't _GlobalDef) defs
         globals             = globalDefs^..traverse._GlobalDef
 
-    return . Model modelT $ over (traverse._ModuleDef) (merge globals) defs'
+    return . Model $ over (traverse._ModuleDef) (merge globals) defs'
   where
     merge decls m = m { modVars = decls ++ modVars m }
 

@@ -112,18 +112,19 @@ class HasExprs n where
 class HasIdents n where
     idents :: Traversal' n Name
 
-data Model a = Model !ModelType [Definition a] deriving (Eq, Functor, Show)
+newtype Model a = Model [Definition a] deriving (Eq, Functor, Show)
 
 type LModel = Model SrcLoc
 
 instance HasExprs Model where
-    exprs f (Model modelT defs) = Model modelT <$> traverse (exprs f) defs
+    exprs f (Model defs) = Model <$> traverse (exprs f) defs
 
 -- | The model type.
 data ModelType = MDP | DTMC | CTMC deriving (Eq, Show)
 
 data Definition a
-  = ModuleDef   (Module a)
+  = ModelTypeDef !ModelType
+  | ModuleDef   (Module a)
   | RenameDef   (Renaming a)
   | GlobalDef   (VarDecl a)
   | ConstDef    (Constant a)
@@ -137,14 +138,13 @@ type LDefinition = Definition SrcLoc
 
 instance HasExprs Definition where
     exprs f def = case def of
-        ModuleDef   m -> ModuleDef   <$> exprs f m
-        RenameDef   r -> pure $ RenameDef r
-        GlobalDef   g -> GlobalDef   <$> exprs f g
-        ConstDef    c -> ConstDef    <$> exprs f c
-        FormulaDef  d -> pure $ FormulaDef d
-        LabelDef    l -> LabelDef    <$> exprs f l
-        RewardsDef  r -> RewardsDef  <$> exprs f r
-        InitDef     i -> InitDef     <$> exprs f i
+        ModuleDef  m -> ModuleDef   <$> exprs f m
+        GlobalDef  g -> GlobalDef   <$> exprs f g
+        ConstDef   c -> ConstDef    <$> exprs f c
+        LabelDef   l -> LabelDef    <$> exprs f l
+        RewardsDef r -> RewardsDef  <$> exprs f r
+        InitDef    i -> InitDef     <$> exprs f i
+        _            -> pure def
 
 data Module a = Module
   { modName  :: !Name
@@ -470,9 +470,7 @@ l `land` r                = binaryExpr (LogicBinOp LAnd) l r
 makePrisms ''Definition
 
 instance Pretty (Model a) where
-    pretty (Model modelT defs) =
-        pretty modelT <> line <> line <>
-        vsep (punctuate line $ map pretty defs) <> line
+    pretty (Model defs) = vsep (punctuate line $ map pretty defs) <> line
 
 instance Pretty ModelType where
     pretty modelT = case modelT of
@@ -482,14 +480,15 @@ instance Pretty ModelType where
 
 instance Pretty (Definition a) where
     pretty def = case def of
-        ModuleDef   m -> pretty m
-        RenameDef   r -> pretty r
-        GlobalDef   g -> "global" <+> pretty g
-        ConstDef    c -> pretty c
-        FormulaDef  f -> pretty f
-        LabelDef    l -> pretty l
-        RewardsDef  r -> pretty r
-        InitDef     i -> pretty i
+        ModelTypeDef t -> pretty t
+        ModuleDef    m -> pretty m
+        RenameDef    r -> pretty r
+        GlobalDef    g -> "global" <+> pretty g
+        ConstDef     c -> pretty c
+        FormulaDef   f -> pretty f
+        LabelDef     l -> pretty l
+        RewardsDef   r -> pretty r
+        InitDef      i -> pretty i
 
 instance Pretty (Module a) where
     pretty (Module name decls stmts _) =

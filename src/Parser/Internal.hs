@@ -166,15 +166,19 @@ loc p = do
     ($ SrcLoc name line column) <$> p
 
 model :: Parser LModel
-model = Model <$> option MDP modelType
-              <*> many (choice [ moduleDef
-                               , globalDef
-                               , constantDef
-                               , formulaDef
-                               , labelDef
-                               , rewardsDef
-                               , initDef
-                               ])
+model = fmap Model . many . choice $
+    [ modelTypeDef
+    , moduleDef
+    , globalDef
+    , constantDef
+    , formulaDef
+    , labelDef
+    , rewardsDef
+    , initDef
+    ]
+
+modelTypeDef :: Parser LDefinition
+modelTypeDef = ModelTypeDef <$> modelType
 
 modelType :: Parser ModelType
 modelType =  MDP  <$ reserved "mdp"
