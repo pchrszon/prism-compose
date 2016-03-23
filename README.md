@@ -4,27 +4,29 @@ Building from source
 Prerequisites
 -------------
 
-To build the compose tool from source you need GHC (at least version 7.10.1)
-and the cabal-install tool. Both may be provided by your package manager,
-alternatively see [www.haskell.org/downloads][haskell.org/downloads] for
-downloads and instructions.
+Download and install the `stack` tool from [Stackage](www.stackage.org).
+
+If you do not have a recent version of GHC on your system (at least version
+7.10), run
+
+    stack setup
+
+in the project directory (containing the `stack.yaml` file) to install the
+compiler.
 
 Building
 --------
 
-*   It is recommended to build the package in an isolated environment by
-    creating a cabal sandbox (otherwise all packages will be installed to your
-    user package database). Make sure you create the sandbox in the directory
-    that contains the `compose.cabal` file:
+To build the tool, run the following command in the project's root directory
+(containing the `stack.yaml` file):
 
-        cabal sandbox init
+    stack build
 
-*   To build the compose tool, execute the following command in the project's
-    root directory (the directory containing the `compose.cabal` file):
+Optionally, you may run
 
-        cabal install
+    stack install
 
-    The executable will be written to `.cabal-sandbox/bin/compose`.
+to copy the `profeat` binary to ~/.local/bin.
 
 Usage
 =====
