@@ -27,16 +27,17 @@ module Parallel
 import Control.Applicative
 
 import Data.Maybe
-import Data.Monoid
 
 import Syntax
 
 -- | Monoid under parallel composition.
 newtype Parallel = Parallel { getParallel :: Module () }
 
+instance Semigroup Parallel where
+    Parallel m1 <> Parallel m2 = Parallel (compose m1 m2)
+
 instance Monoid Parallel where
     mempty = Parallel emptyModule
-    mappend (Parallel m1) (Parallel m2) = Parallel (compose m1 m2)
 
 emptyModule :: Module ()
 emptyModule = Module "" [] [] ()
