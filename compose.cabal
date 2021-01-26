@@ -1,5 +1,5 @@
 name:          compose
-version:       1.4.1
+version:       1.4.2
 synopsis:      Parallel composition of Prism modules
 description:   This tool performs the parallel composition of Prism
                modules on the source code level.
@@ -7,7 +7,7 @@ license:       GPL-3
 license-file:  LICENSE
 author:        Philipp Chrszon
 maintainer:    Philipp.Chrszon@tu-dresden.de
-copyright:     (c) 2020 Philipp Chrszon
+copyright:     (c) 2021 Philipp Chrszon
 category:      Language
 build-type:    Simple
 cabal-version: >=1.10
