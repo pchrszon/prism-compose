@@ -1,7 +1,7 @@
 # prism-compose
 
 This tool performs the parallel composition of
-[PRISM](www.prismmodelchecker.org) on the PRISM language level.
+[PRISM](http://www.prismmodelchecker.org) modules on the PRISM language level.
 
 ## Usage
 
@@ -29,7 +29,7 @@ the global variables into this module using the `--merge-globals` option:
 
 ### Prerequisites
 
-Download and install the `stack` tool from [haskellstack.org](www.haskellstack.org).
+Download and install the `stack` tool from [haskellstack.org](https://www.haskellstack.org).
 
 ### Building
 
